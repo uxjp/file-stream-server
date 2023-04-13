@@ -3,7 +3,29 @@ const fs = require('fs');
 const path = require('path');
 
 const server = http.createServer((req, res) => {
-    if (req.method === 'POST' && req.headers['content-type'] === 'application/octet-stream' && req.url === '/img') {
+    if (req.method === 'POST' && req.headers['content-type'] === 'application/octet-stream' && req.url === '/pdf') {
+      let body = []
+
+      req.on('data', (chunk) => {
+        body.push(chunk)
+      })
+
+      req.on('end', () => {
+        const data = Buffer.concat(body)
+        const filename = 'report1' + '.pdf'
+
+        fs.writeFile(path.join(__dirname, filename), data, (err) => {
+          if (err) {
+            console.error(err)
+            res.statusCode = 500
+            res.end('Error writing to file')
+          } else {
+            res.statusCode = 200
+            res.end(`PDF file ${filename} saved.`)
+          }
+        })
+      })
+    } else if (req.method === 'POST' && req.headers['content-type'] === 'application/octet-stream' && req.url === '/img') {
       let body = [];
 
       req.on('data', (chunk) => {
